@@ -38,7 +38,7 @@ function operation() {
 // create an account 
 
 function createAccount() {
-    console.log(chalk.bgGreen.black('Parabéns por escolher o nosso banco!'))
+    console.log(chalk.yellow('Parabéns por escolher o nosso banco!'))
     console.log(chalk.green('Defina as opções da sua conta a seguir:'))
 
     buildAccount()
@@ -159,6 +159,8 @@ function addAmount(accountName, amount) {
 
 }
 
+// account file in json
+
 function getAccount(accountName) {
     const accountJSON = fs.readFileSync(`accounts/${accountName}.json`, {
         encoding: 'utf8',
@@ -216,14 +218,40 @@ function withdraw() {
 ]).then((answer) => {
 
     const amount = answer['amount']
-    console.log(amount)
+    removeAmount(accountName, amount)
+
+})
+.catch(err => console.log(err))
+})
+.catch(err => console.log(err))
+}
+
+function removeAmount(accountName, amount) {
+
+    const accountData = getAccount(accountName)
+
+    if(!amount) {
+        console.log(chalk.bgRed.black('Erro! Tente novamente mais tarde!'))
+        return withdraw()
+    }
+
+    if(accountData.balance < amount) {
+        console.log(chalk.bgRed.black('Valor indisponível!'))
+        return withdraw()
+    }
+
+    accountData.balance = parseFloat(accountData.balance) - parseFloat(amount)
+
+    fs.writeFileSync(
+        `accounts/${accountName}.json`,
+        JSON.stringify(accountData),
+        function(err) {
+            console.log(err)
+        }
+    )
+
+    console.log(chalk.green(`Foi realizado um saque de R$${(amount)} da sua conta!`))
     operation()
-
-})
-.catch(err => console.log(err))
-
-})
-.catch(err => console.log(err))
 
 }
 
